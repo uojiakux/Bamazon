@@ -43,11 +43,15 @@ var connection = mysql.createConnection({
       .then(function(answer) {
         var query = "SELECT position FROM products WHERE ?";
         connection.query(query, { position: answer.id }, function(err, res) {
-            if (answer.id === res[this].position) {
-                secondQuestion();
-            }
-            else{
-                // Else, Write an error code if this doesn't work. Stating that item is not a product choice
+            // if (answer.id === res[this].position) {
+            //     secondQuestion();
+            // }
+
+            // if query is successful..
+            secondQuestion();
+
+            if (err) {
+              console.log("This product does not exist.")
             }
         });
       });
