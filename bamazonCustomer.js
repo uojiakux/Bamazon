@@ -1,31 +1,38 @@
-var mysql = require("mysql");
-var inquirer = require("inquirer");
+const mysql = require("mysql");
+const inquirer = require("inquirer");
 
-var connection = mysql.createConnection({
-    host: "root",
+const connection = mysql.createConnection({
+    host: "localhost",
     port: 3306,
     user: "root",
     password: "",
     database: "bamazon"
   });
   
-  connection.connect(function(err) {
+  connection.connect(function (err) {
+
     if (err) throw err;
-    console.log("This connection is on and working.")
-    showProductList();
+    console.log("This connection is on and working.");
+    console.log("Initial user input for ID: " + userInputID);
+
+
+    connection.query('SELECT * FROM products', (err, res) => {
+      
+      // console.log(res);
+
+      console.log("\n");
+      console.log("\n" + "item_id " + "   " + "product_name" + "  " + "department_name" + "   " + "price" + "   " + "stock_quantity");
+      console.log("------------------------------------------------------------------------");
+
+      // firstQuestion();
+      for (var i = 0; i < res.length; i++) {
+        console.log("   " + res[i].item_id + "       " + res[i].product_name + "       " + res[i].department_name + " | " + res[i].price + " | " + res[i].stock_quantity + "\n");
+      }
+
+  })
   });
 
-  function showProductList() {
-    connection.query("SELECT * FROM products", function(err, res) {
-      if (err) throw err;
-      console.log(res);
-
-      firstQuestion();
-      
-      // the connection is terminated now. 
-      // connection.end();
-    });
-  }
+  var userInputID = 0;
 
   function firstQuestion() {
     inquirer
@@ -41,18 +48,17 @@ var connection = mysql.createConnection({
           }
         })
       .then(function(answer) {
-        var query = "SELECT position FROM products WHERE ?";
-        connection.query(query, { position: answer.id }, function(err, res) {
-            // if (answer.id === res[this].position) {
-            //     secondQuestion();
-            // }
 
-            // if query is successful..
-            secondQuestion();
+            userInputID = answer.id;
+            console.log("Updated user input for ID: " + userInputID);
 
-            if (err) {
-              console.log("This product does not exist.")
-            }
+        var query = "SELECT * FROM products";
+        connection.query(query, function(err, res) {
+
+            // console.log(res);
+            // secondQuestion();
+
+            // Need a code for this product does not exist.
         });
       });
   }
