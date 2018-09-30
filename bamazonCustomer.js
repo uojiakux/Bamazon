@@ -108,12 +108,7 @@ const connection = mysql.createConnection({
 
                                                 console.log("Updating Product Quantity...");
 
-                                                // console.log("\n");
-                                                // console.log("\n" + "item_id " + "   " + "product_name" + "  " + "department_name" + "   " + "price" + "   " + "stock_quantity");
-                                                // console.log("-------------------------------------------------------------------------------------------");
-                                                // for (var i = 0; i < res.length; i++) {
-                                                //   console.log("   " + res[i].item_id + "       " + res[i].product_name + "       " + res[i].department_name + " | " + res[i].price + " | " + res[i].stock_quantity + "\n");
-                                                // }
+                                              
                                                 ShowNewStoreProducts();
                                               }
                                             )};
@@ -134,6 +129,7 @@ const connection = mysql.createConnection({
         });
   }
   
+  // I could not get the updated Table to show. If I had more time I would fix this. 
   function ShowNewStoreProducts(){
   connection.query('SELECT * FROM products', function (err, res) {
       
