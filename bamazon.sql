@@ -10,5 +10,4 @@ CREATE TABLE products (
 
 SELECT * FROM bamazon.products;
 
-UPDATE `products` SET `product_name` = 'Bill Haley' WHERE `item_id` = 2;
-UPDATE `products` SET `product_name` = 'Sinead O Conn' WHERE `item_id` = 7;
+-- DROP TABLE bamazon.products;

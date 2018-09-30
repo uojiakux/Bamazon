@@ -9,28 +9,33 @@ const connection = mysql.createConnection({
     database: "bamazon"
   });
   
+// START APP
+
   connection.connect(function (err) {
 
     if (err) throw err;
-    console.log("This connection is on and working.");
-    console.log("Initial user input for ID: " + userInputID);
+    // console.log("This connection is on and working.");
+    // console.log("Initial user input for ID: " + userInputID);
 
 
-    connection.query('SELECT * FROM products', (err, res) => {
+    connection.query('SELECT * FROM products', function (err, res) {
       
       // console.log(res);
 
       console.log("\n");
       console.log("\n" + "item_id " + "   " + "product_name" + "  " + "department_name" + "   " + "price" + "   " + "stock_quantity");
-      console.log("------------------------------------------------------------------------");
+      console.log("-------------------------------------------------------------------------------------------");
 
-      // firstQuestion();
+
       for (var i = 0; i < res.length; i++) {
         console.log("   " + res[i].item_id + "       " + res[i].product_name + "       " + res[i].department_name + " | " + res[i].price + " | " + res[i].stock_quantity + "\n");
       }
 
+      firstQuestion();
   })
   });
+
+  // INITIATE QUESTIONS
 
   var userInputID = 0;
 
@@ -50,60 +55,98 @@ const connection = mysql.createConnection({
       .then(function(answer) {
 
             userInputID = answer.id;
-            console.log("Updated user input for ID: " + userInputID);
+            // console.log("Updated user input for ID: " + userInputID);
 
-        var query = "SELECT * FROM products";
-        connection.query(query, function(err, res) {
+        var query = "SELECT product_name, price, stock_quantity FROM products WHERE item_id = ?";
+        connection.query(query, userInputID, function(err, res) {
 
-            // console.log(res);
-            // secondQuestion();
 
-            // Need a code for this product does not exist.
+            console.log("\n" + res[0].product_name + "  |  " + "Price: " + res[0].price + "  |  " + "Stock Quantity: " + res[0].stock_quantity + "\n\n");
+            secondQuestion();
+
+            var price = res[0].price;
+            var stock = res[0].stock_quantity;
+            // Could not get the following to work
+            // if (err) console.log("This product does not exist");
+            // if (res === []) console.log("This product does not exist");
+       
+                              function secondQuestion() {
+                                inquirer
+                                  .prompt({
+                                    name: "desiredAmount",
+                                    type: "input",
+                                    message: "How many units of this product would you like to buy?",
+                                    validate: function(value) {
+                                        if (isNaN(value) === false) {
+                                          return true;
+                                        }
+                                        return false;
+                                      }
+                                    })
+                                  .then(function(answer) {
+                                        if (answer.desiredAmount < res[0].stock_quantity) {
+
+                                          function updateProduct() {
+                                            stock -=  answer.desiredAmount;
+                                        
+                                            var updateQuery = connection.query(
+                                              "UPDATE products SET ? WHERE item_id = ?",
+                                                    [
+                                                      {
+                                                        stock_quantity: stock
+                                                      },
+                                                      {
+                                                        userInputID
+                                                      }
+                                                    ],
+                                        
+                                              function(err, res) {
+
+                                                var priceForCustomer = answer.desiredAmount * price;
+                                                console.log("\n Your total cost wil be $" + priceForCustomer + "\n\n\n");
+
+
+                                                console.log("Updating Product Quantity...");
+
+                                                // console.log("\n");
+                                                // console.log("\n" + "item_id " + "   " + "product_name" + "  " + "department_name" + "   " + "price" + "   " + "stock_quantity");
+                                                // console.log("-------------------------------------------------------------------------------------------");
+                                                // for (var i = 0; i < res.length; i++) {
+                                                //   console.log("   " + res[i].item_id + "       " + res[i].product_name + "       " + res[i].department_name + " | " + res[i].price + " | " + res[i].stock_quantity + "\n");
+                                                // }
+                                                ShowNewStoreProducts();
+                                              }
+                                            )};
+
+                                            updateProduct();
+
+                                        }
+                                        else {
+                                          console.log("There is not enough stock for this product. \n");
+                                          secondQuestion();
+                                        }
+                                    });
+                                  };  
+             
+             
+             })
+
         });
-      });
-  }
-
-  function secondQuestion() {
-    inquirer
-      .prompt({
-        name: "id",
-        type: "input",
-        message: "How many units of this product would you like to buy?",
-        validate: function(value) {
-            if (isNaN(value) === false) {
-              return true;
-            }
-            return false;
-          }
-        })
-      .then(function(answer) {
-        var query = "SELECT quantity FROM products WHERE ?";
-        connection.query(query, { artist: answer.artist }, function(err, res) {
-            if (answer.id < res[this].position) {
-                updateProduct();
-            }
-            else {
-              console.log("There is not enough stock for this product.");
-            }
-        });
-      });
   }
   
-  function updateProduct() {
-    console.log("Updating Product Quantity...\n");
-    var query = connection.query(
-      "UPDATE products SET ? WHERE ?",
-      [
-        {
-          quantity: 100
-        },
-        {
-          flavor: "Rocky Road"
-        }
-      ],
-      function(err, res) {
-        console.log(res.affectedRows + " products updated!\n");
-        // Call deleteProduct AFTER the UPDATE completes
-        deleteProduct();
-      }
-    )};
+  function ShowNewStoreProducts(){
+  connection.query('SELECT * FROM products', function (err, res) {
+      
+    // console.log(res);
+
+    console.log("\n");
+    console.log("\n" + "item_id " + "   " + "product_name" + "  " + "department_name" + "   " + "price" + "   " + "stock_quantity");
+    console.log("-------------------------------------------------------------------------------------------");
+
+
+    for (var i = 0; i < res.length; i++) {
+      console.log("   " + res[i].item_id + "       " + res[i].product_name + "       " + res[i].department_name + " | " + res[i].price + " | " + res[i].stock_quantity + "\n");
+    }
+
+    firstQuestion();
+})}
